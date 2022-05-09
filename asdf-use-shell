@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+plugin=$1; shift
+version=$1; shift
+
+versions=$(asdf list "$plugin" | sort --version-sort --reverse)
+
+for candidate in $versions; do
+    if [ "$candidate" = "$version" ]; then
+        exec asdf export-shell-version sh "$plugin" "$version"
+    fi
+done
+
+escaped_version=$(echo "$version" | sed 's/\./\\./g')
+
+# Use `:` (no-op) if fail to prevent crash
+match=$(echo "$versions" | grep -E "^\s*$escaped_version\." | sed 's/ //g' || :)
+
+if [ -z "$match" ]; then
+    echo "no version match $version for $plugin" >&2
+    echo >&2
+    echo "available versions:" >&2
+    echo "$versions" >&2
+    echo false
+fi
+
+asdf export-shell-version sh "$plugin" "$match"
