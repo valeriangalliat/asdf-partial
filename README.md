@@ -38,3 +38,11 @@ look like this:
 . ~/.asdf/asdf.sh
 . ~/.asdf/asdf-use/asdf-use.sh
 ```
+
+## Contributing
+
+This plugin is very basic and might not work for all use cases, e.g.
+shells other than Bash or Zsh, and SemVer prereleases or build metadata
+versions.
+
+Pull requests more than welcome if you want to improve it. Cheers! 🍻
