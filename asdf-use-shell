@@ -1,13 +1,20 @@
 #!/bin/sh -e
 
-plugin=$1; shift
-version=$1; shift
+help_error() {
+  echo 'Usage: asdf use <plugin> <version>' >&2
+  exit 1
+}
+
+plugin=$1; shift || help_error
+version=$1; shift || help_error
 
 versions=$(asdf list "$plugin" | sort --version-sort --reverse)
 
 for candidate in $versions; do
     if [ "$candidate" = "$version" ]; then
-        exec asdf export-shell-version sh "$plugin" "$version"
+        asdf export-shell-version sh "$plugin" "$version"
+        echo "using $plugin version $version" >&2
+        exit
     fi
 done
 
@@ -21,7 +28,8 @@ if [ -z "$match" ]; then
     echo >&2
     echo "available versions:" >&2
     echo "$versions" >&2
-    echo false
+    exit 1
 fi
 
 asdf export-shell-version sh "$plugin" "$match"
+echo "using $plugin version $match" >&2
