@@ -1,0 +1,51 @@
+#!/bin/sh -e
+
+# Put asdf back first in `PATH` so the wrapper is not recursively called
+export PATH="$ASDF_DIR/bin:$PATH"
+
+if [ $# -lt 3 ]; then
+    exec asdf "$@"
+fi
+
+command=$1; shift
+
+if [ "$command" = export-shell-version ]; then
+    shell=$1; shift
+fi
+
+plugin=$1; shift
+version=$1; shift
+
+if [ "$version" = latest ]; then
+    exec asdf "$command" "$plugin" "$version"
+fi
+
+match() {
+    all=$1; shift
+
+    #
+    # No quotes around `$all` to ignore argument if it's set to empty string.
+    #
+    # Also asdf seems to return versions already sorted so no need to do it
+    # again.
+    #
+    # Use `xargs` to trim the string of spaces around.
+    #
+    match=$(asdf list $all "$plugin" "$version" | tail -1 | xargs)
+
+    if [ -z "$match" ]; then
+        # `asdf list` already prints an error message when no match is found
+        exit 1
+    fi
+
+    # Do not quote `$shell` so it's skipped if not set
+    exec asdf "$command" $shell "$plugin" "$match" "$@"
+}
+
+case "$command" in
+    install) match all "$@" ;;
+    global) match '' "$@" ;;
+    local) match '' "$@" ;;
+    export-shell-version) match '' "$@" ;;
+    *) exec asdf "$command" "$plugin" "$version" "$@" ;;
+esac

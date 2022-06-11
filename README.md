@@ -1,48 +1,60 @@
-# asdf-use
+# 🦩 asdf-partial
 
-> [asdf] plugin to add a `use` command with partial version match.
+> [asdf] wrapper to handle partial (fuzzy, best-matching) version strings.
 
 [asdf]: https://github.com/asdf-vm/asdf
 
 ## Overview
 
-```console
-$ asdf use nodejs 16
-$ node --version
-v16.8.0
+By default asdf [doesn't support partial version matching](https://github.com/asdf-vm/asdf/issues/352).
 
-$ asdf use nodejs 18.1
+This means you can't `asdf install nodejs 18` and have it install the
+latest matching version e.g. 18.3.0. Same goes for `asdf global`, `asdf
+local` and `asdf shell`.
+
+**asdf-partial** wraps asdf to provide partial version match for those
+commands.
+
+```console
+$ asdf install nodejs 18
+Trying to update node-build... ok
+node-build: definition not found: 18
+
+$ git clone https://github.com/valeriangalliat/asdf-partial ~/.asdf/asdf-partial
+$ export PATH=~/.asdf/asdf-partial:$PATH
+
+$ asdf install nodejs 18
+Trying to update node-build... ok
+Downloading node-v18.3.0.tar.gz...
+-> https://nodejs.org/dist/v18.3.0/node-v18.3.0.tar.gz
+Installing node-v18.3.0...
+Installed node-v18.3.0 to ~/.asdf/installs/nodejs/18.3.0
+
+$ asdf shell nodejs 18
+$ node --version
+v18.3.0
+
+$ asdf list nodejs
+  18.1.0
+  18.3.0
+
+$ asdf shell nodejs 18.1
 $ node --version
 v18.1.0
 
-$ asdf use nodejs 18.2
-no version match 18.2 for nodejs
-
-available versions:
-  18.1.0
-  16.8.0
+$ asdf shell nodejs 18.2
+No compatible versions installed (nodejs 18.2)
 ```
 
 ## Installation
 
 ```sh
-git clone https://github.com/valeriangalliat/asdf-use.git ~/.asdf/asdf-use
+git clone https://github.com/valeriangalliat/asdf-partial ~/.asdf/asdf-partial
 ```
 
 Then in your `~/.zshrc` or `~/.bashrc` or equivalent, after the line
-where you source `~/.asdf/asdf.sh`, also source
-`~/.asdf/asdf-use/asdf-use.sh`. For example with Bash or Zsh it should
-look like this:
+where you source `~/.asdf/asdf.sh`, add the following:
 
 ```sh
-. ~/.asdf/asdf.sh
-. ~/.asdf/asdf-use/asdf-use.sh
+export PATH=~/.asdf/asdf-partial:$PATH
 ```
-
-## Contributing
-
-This plugin is very basic and might not work for all use cases, e.g.
-shells other than Bash or Zsh, and SemVer prereleases or build metadata
-versions.
-
-Pull requests more than welcome if you want to improve it. Cheers! 🍻
